@@ -10,25 +10,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class LocationHistoryViewAdapter extends RecyclerView.Adapter<LocationHistoryViewAdapter.MyViewHolder> {
+public class LocationHistoryViewAdapter extends RecyclerView.Adapter<LocationHistoryViewAdapter.LocationHistoryViewHolder> {
     private ArrayList<LocationEntry> mDataset;
     private static final String TAG = LocationHistoryViewAdapter.class.getSimpleName();
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
     // you provide access to all the views for a data item in a view holder
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public static class LocationHistoryViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public LinearLayout mLinearLayout;
         public TextView mLocationTime;
         public TextView mLocationLon;
         public TextView mLocationLat;
-        public MyViewHolder(LinearLayout linearLayout) {
+        public LocationHistoryViewHolder(LinearLayout linearLayout) {
             super(linearLayout);
             mLinearLayout = linearLayout;
-            mLocationTime = (TextView)linearLayout.getChildAt(0);
-            mLocationLon = (TextView)linearLayout.getChildAt(1);
-            mLocationLat = (TextView)linearLayout.getChildAt(2);
+            mLocationTime = (TextView)linearLayout.findViewWithTag("locationHistoryTime");
+            mLocationLon = (TextView)linearLayout.findViewWithTag("locationHistoryLongitude");
+            mLocationLat = (TextView)linearLayout.findViewWithTag("locationHistoryLatitude");
         }
     }
 
@@ -39,26 +39,25 @@ public class LocationHistoryViewAdapter extends RecyclerView.Adapter<LocationHis
 
     // Create new views (invoked by the layout manager)
     @Override
-    public LocationHistoryViewAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent,
-                                                                      int viewType) {
+    public LocationHistoryViewHolder onCreateViewHolder(ViewGroup parent,
+                                                        int viewType) {
         // create a new view
         Log.d(TAG, "onCreateViewHolder -> called");
         LinearLayout linearLayout = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.location_history_textview, parent, false);
-        MyViewHolder vh = new MyViewHolder(linearLayout);
+        LocationHistoryViewHolder vh = new LocationHistoryViewHolder(linearLayout);
         return vh;
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     @Override
-    public void onBindViewHolder(MyViewHolder holder, int position) {
+    public void onBindViewHolder(LocationHistoryViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         Log.d(TAG, "onBindViewHolder -> called with position " + position + " holder is " + holder);
         holder.mLocationTime.setText(mDataset.get(position).getTime());
         holder.mLocationLat.setText(Double.toString(mDataset.get(position).getLocation().getLatitude()));
         holder.mLocationLon.setText(Double.toString(mDataset.get(position).getLocation().getLongitude()));
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)

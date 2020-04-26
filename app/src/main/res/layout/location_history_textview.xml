@@ -33,4 +33,5 @@
         android:tag="locationHistoryLatitude">
 
     </TextView>
+
 </LinearLayout>

@@ -106,6 +106,9 @@ public class MainActivity extends AppCompatActivity {
     private final static String KEY_REQUESTING_LOCATION_UPDATES = "requesting-location-updates";
     private final static String KEY_LOCATION = "location";
     private final static String KEY_LAST_UPDATED_TIME_STRING = "last-updated-time-string";
+     // constants
+    private final float MILES_PER_METER = 0.000621371f;
+    private final float MIN_DISTANCE_BETWEEN_LOCATIONS = 3.0f;
 
     /**
      * Provides access to the Fused Location Provider API.
@@ -142,6 +145,14 @@ public class MainActivity extends AppCompatActivity {
      * Represents a geographical location.
      */
     private Location mCurrentLocation;
+    /**
+     * Last location we used for distance calculation.
+     */
+    private Location mLastLocationForDistance;
+    /**
+     * Total distance traveled
+     */
+    private float mTotalDistanceTraveled = 0.0f;
 
     // UI Widgets.
     private Button mStartUpdatesButton;
@@ -149,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mLastUpdateTimeTextView;
     private TextView mLatitudeTextView;
     private TextView mLongitudeTextView;
+    private TextView mTotalDistanceTraveledTextView;
     private RecyclerView mLocationHistory;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -187,6 +199,7 @@ public class MainActivity extends AppCompatActivity {
         mLongitudeTextView = (TextView) findViewById(R.id.longitude_text);
         mLastUpdateTimeTextView = (TextView) findViewById(R.id.last_update_time_text);
         mLocationHistory = (RecyclerView)findViewById(R.id.location_history);
+        mTotalDistanceTraveledTextView = (TextView)findViewById(R.id.total_distance_traveled);
 
         // Set labels.
         mLatitudeLabel = getResources().getString(R.string.latitude_label);
@@ -282,6 +295,19 @@ public class MainActivity extends AppCompatActivity {
      */
     private void addLocationToList(Location location, String time) {
         Log.d(TAG, "Adding location (" + location.getLatitude() + "), (" + location.getLongitude() + ")");
+        if (mLastLocationForDistance == null) {
+            mLastLocationForDistance = location;
+        } else {
+            float distanceTo = location.distanceTo(mLastLocationForDistance);
+            Log.d(TAG, "Distance between two locations is " + distanceTo);
+            if (distanceTo > MIN_DISTANCE_BETWEEN_LOCATIONS) {
+                mTotalDistanceTraveled += distanceTo;
+                mLastLocationForDistance = location;
+                Log.d(TAG, "Adding to total distance traveled, is now " + mTotalDistanceTraveled + " meters");
+                float miles = MILES_PER_METER * mTotalDistanceTraveled;
+                mTotalDistanceTraveledTextView.setText("Distance traveled: " + Float.toString(mTotalDistanceTraveled) + " meters (" + miles +") miles");
+            }
+        }
         mLocations.add(new LocationEntry(location, time));
         Log.d(TAG, "size is now " + mLocations.size());
         mAdapter.notifyItemInserted(mLocations.size()-1);
@@ -373,6 +399,10 @@ public class MainActivity extends AppCompatActivity {
                         mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                                 mLocationCallback, Looper.myLooper());
 
+                        mTotalDistanceTraveled = 0.0f;
+                        mTotalDistanceTraveledTextView.setText("Start moving...");
+                        mLocations.clear();
+                        mAdapter.notifyDataSetChanged();
                         updateUI();
                     }
                 })
