@@ -3,6 +3,7 @@ package com.google.android.gms.location.sample.locationupdates;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -18,10 +19,16 @@ public class LocationHistoryViewAdapter extends RecyclerView.Adapter<LocationHis
     // you provide access to all the views for a data item in a view holder
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public TextView textView;
-        public MyViewHolder(TextView v) {
-            super(v);
-            textView = v;
+        public LinearLayout mLinearLayout;
+        public TextView mLocationTime;
+        public TextView mLocationLon;
+        public TextView mLocationLat;
+        public MyViewHolder(LinearLayout linearLayout) {
+            super(linearLayout);
+            mLinearLayout = linearLayout;
+            mLocationTime = (TextView)linearLayout.getChildAt(0);
+            mLocationLon = (TextView)linearLayout.getChildAt(1);
+            mLocationLat = (TextView)linearLayout.getChildAt(2);
         }
     }
 
@@ -36,9 +43,9 @@ public class LocationHistoryViewAdapter extends RecyclerView.Adapter<LocationHis
                                                                       int viewType) {
         // create a new view
         Log.d(TAG, "onCreateViewHolder -> called");
-        TextView v = (TextView) LayoutInflater.from(parent.getContext())
+        LinearLayout linearLayout = (LinearLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.location_history_textview, parent, false);
-        MyViewHolder vh = new MyViewHolder(v);
+        MyViewHolder vh = new MyViewHolder(linearLayout);
         return vh;
     }
 
@@ -48,7 +55,9 @@ public class LocationHistoryViewAdapter extends RecyclerView.Adapter<LocationHis
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         Log.d(TAG, "onBindViewHolder -> called with position " + position + " holder is " + holder);
-        holder.textView.setText(mDataset.get(position).getTime());
+        holder.mLocationTime.setText(mDataset.get(position).getTime());
+        holder.mLocationLat.setText(Double.toString(mDataset.get(position).getLocation().getLatitude()));
+        holder.mLocationLon.setText(Double.toString(mDataset.get(position).getLocation().getLongitude()));
 
     }
 
